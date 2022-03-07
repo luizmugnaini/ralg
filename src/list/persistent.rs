@@ -1,10 +1,10 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct Persistant<T> {
     head: List<T>,
 }
 
-type List<T> = Option<Rc<Node<T>>>;
+type List<T> = Option<Arc<Node<T>>>;
 
 impl<T> Persistant<T> {
     pub fn new() -> Self {
@@ -13,7 +13,7 @@ impl<T> Persistant<T> {
 
     pub fn prepend(&self, key: T) -> Self {
         Self {
-            head: Some(Rc::new(Node::new(key, self.head.clone()))),
+            head: Some(Arc::new(Node::new(key, self.head.clone()))),
         }
     }
 
@@ -31,6 +31,12 @@ impl<T> Persistant<T> {
         Iter {
             next: self.head.as_deref(),
         }
+    }
+}
+
+impl<T> Default for Persistant<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -53,7 +59,7 @@ impl<T> Drop for Persistant<T> {
     fn drop(&mut self) {
         let mut head = self.head.take();
         while let Some(node) = head {
-            match Rc::try_unwrap(node) {
+            match Arc::try_unwrap(node) {
                 Ok(mut node) => head = node.next.take(),
                 _ => break,
             }

@@ -47,6 +47,12 @@ impl<T> SingleLinked<T> {
     }
 }
 
+impl<T> Default for SingleLinked<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct IntoIter<T>(SingleLinked<T>);
 
 impl<T> Iterator for IntoIter<T> {
