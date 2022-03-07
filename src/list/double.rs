@@ -1,4 +1,4 @@
-use std::cell::{Ref, RefCell};
+use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 
 // Each node should have exactly two pointers to it. Each node in the middle of
@@ -98,11 +98,49 @@ impl<T> DoubleLinked<T> {
             .as_ref()
             .map(|node| Ref::map(node.borrow(), |node| &node.key))
     }
+
+    pub fn peek_back(&self) -> Option<Ref<T>> {
+        self.tail
+            .as_ref()
+            .map(|node| Ref::map(node.borrow(), |node| &node.key))
+    }
+
+    pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
+        self.head
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.key))
+    }
+
+    pub fn peek_back_mut(&mut self) -> Option<RefMut<T>> {
+        self.tail
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.key))
+    }
+
+    pub fn into_iter(self) -> IntoIter<T> {
+        IntoIter(self)
+    }
 }
 
 impl<T> Default for DoubleLinked<T> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+pub struct IntoIter<T>(DoubleLinked<T>);
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop_front()
+    }
+}
+
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<T> {
+        self.0.pop_back()
     }
 }
 
@@ -189,5 +227,94 @@ mod test {
         }
 
         check_empty(list.peek_front());
+    }
+
+    #[test]
+    fn peek_back() {
+        let mut list = DoubleLinked::new();
+        assert!(list.peek_back().is_none());
+
+        for x in 0..3 {
+            list.push_back(x);
+        }
+        for x in (0..3).rev() {
+            assert_eq!(&*list.peek_back().unwrap(), &x);
+            list.pop_back();
+        }
+
+        assert!(list.peek_back().is_none());
+    }
+
+    #[test]
+    fn peek_front_mut() {
+        let mut list = DoubleLinked::new();
+        assert!(list.peek_front_mut().is_none());
+
+        for x in 0..4 {
+            list.push_front(x);
+        }
+        for mut x in (1..4).rev() {
+            assert_eq!(&*list.peek_front_mut().unwrap(), &mut x);
+            list.pop_front();
+        }
+        assert_eq!(&*list.peek_front_mut().unwrap(), &mut 0);
+
+        {
+            // Check for the mutability of the peek method
+            let bm = list.peek_front_mut().unwrap();
+            let mut node_key = RefMut::map(bm, |key| key);
+            assert_eq!(*node_key, 0);
+            *node_key = 5;
+        }
+        assert_eq!(&*list.peek_front_mut().unwrap(), &mut 5);
+    }
+
+    #[test]
+    fn peek_back_mut() {
+        let mut list = DoubleLinked::new();
+        assert!(list.peek_back_mut().is_none());
+
+        for x in 0..4 {
+            list.push_back(x);
+        }
+        for mut x in (1..4).rev() {
+            assert_eq!(&*list.peek_back_mut().unwrap(), &mut x);
+            list.pop_back();
+        }
+        assert_eq!(&*list.peek_back_mut().unwrap(), &mut 0);
+
+        {
+            // Check for the mutability of the peek method
+            let bm = list.peek_back_mut().unwrap();
+            let mut node_key = RefMut::map(bm, |key| key);
+            assert_eq!(*node_key, 0);
+            *node_key = 5;
+        }
+        assert_eq!(&*list.peek_back_mut().unwrap(), &mut 5);
+    }
+
+    #[test]
+    fn into_iter() {
+        // Iter next
+        let mut list = DoubleLinked::new();
+        for x in 0..3 {
+            list.push_front(x);
+        }
+        let mut iter = list.into_iter();
+        for x in (0..3).rev() {
+            assert_eq!(iter.next(), Some(x));
+        }
+        assert!(iter.next().is_none());
+
+        // Iter next back
+        let mut list = DoubleLinked::new();
+        for x in 0..3 {
+            list.push_front(x);
+        }
+        let mut iter = list.into_iter();
+        for x in 0..3 {
+            assert_eq!(iter.next_back(), Some(x));
+        }
+        assert!(iter.next().is_none());
     }
 }
