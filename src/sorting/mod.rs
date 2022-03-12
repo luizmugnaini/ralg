@@ -1,4 +1,5 @@
-mod insertion_sort;
+mod insertion;
+mod merge;
 
 use std::cmp::PartialOrd;
 

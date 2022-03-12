@@ -1,4 +1,4 @@
-use crate::sorting::Sorter;
+use super::Sorter;
 use std::cmp::PartialOrd;
 
 pub struct InsertionSort;

@@ -126,7 +126,7 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 
 impl<T> Drop for Queue<T> {
     fn drop(&mut self) {
-        while let Some(_) = self.pop() {}
+        while self.pop().is_some() {}
     }
 }
 
