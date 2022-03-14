@@ -1,5 +1,6 @@
 mod insertion;
 mod merge;
+mod search;
 
 use std::cmp::PartialOrd;
 
@@ -7,6 +8,7 @@ trait Sorter {
     fn sort<T: PartialOrd + Copy>(xs: &mut [T]);
 }
 
+/// Checks if array `xs` is sorted
 pub fn is_sorted(xs: &[impl PartialOrd]) -> bool {
     let mut last = &xs[0];
     for next in xs {
@@ -20,14 +22,12 @@ pub fn is_sorted(xs: &[impl PartialOrd]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
-    fn sorted() {
+    fn is_sorted() {
         let v1 = vec![1, 2, 3, 4, 5, 5];
-        assert!(is_sorted(&v1));
+        assert!(super::is_sorted(&v1));
 
         let v2 = vec![0, 3, 9, 8, 10];
-        assert!(!is_sorted(&v2));
+        assert!(!super::is_sorted(&v2));
     }
 }

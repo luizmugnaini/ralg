@@ -76,8 +76,6 @@ mod test {
         struct Index {
             index: usize,
         }
-        const n: Index = Index { index: 3 };
-        let mut v = [0; n.index];
 
         let mut xs = vec![5, 6, 7, 8, 1, 2, 3, 4];
         super::merge(&mut xs, 0, 3, 7);
