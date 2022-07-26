@@ -1,4 +1,4 @@
-use std::cell::{Ref, RefCell, RefMut};
+pub(crate) use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 
 // Each node should have exactly two pointers to it. Each node in the middle of

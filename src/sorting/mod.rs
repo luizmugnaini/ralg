@@ -1,6 +1,7 @@
 mod insertion;
 mod merge;
 mod search;
+mod tim;
 
 use std::cmp::PartialOrd;
 
