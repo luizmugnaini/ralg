@@ -1,10 +1,9 @@
 //! An implementation of complex numbers
-use crate::math::num::{Num, Zero};
-use crate::zero_impl;
-use core::ops::{Add, Mul, Neg, Sub};
+use crate::math::num::{Num, One, Zero};
+use core::ops::{Add, Div, Mul, Neg, Sub};
 
 /// Complex number
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Complex<T: Clone + Num> {
     /// Real part
     pub re: T,
@@ -74,7 +73,7 @@ impl Complex<f32> {
     }
 
     /// Returns the `n`th root of unity.
-    pub fn root_of_unity(n: usize) -> Self {
+    pub fn root_of_unity(n: i32) -> Self {
         // e^{theta i} = cos(theta) + sin(theta) * i
         let theta: f32 = -2.0 * std::f32::consts::PI / n as f32;
         Complex::new(theta.cos(), theta.sin())
@@ -99,6 +98,12 @@ impl Complex<f64> {
         // e^{theta i} = cos(theta) + sin(theta) * i
         let theta: f64 = 2.0 * std::f64::consts::PI / n as f64;
         Complex::new(theta.cos(), theta.sin())
+    }
+}
+
+impl<T: Num + Copy + Clone + Div<Output = T>> Complex<T> {
+    pub fn divide(self, rhs: T) -> Self {
+        Complex::new(self.re / rhs, self.im / rhs)
     }
 }
 
@@ -155,21 +160,17 @@ impl<T: Clone + Num> Add<T> for Complex<T> {
     }
 }
 
-zero_impl!(Complex<usize>, Complex::new(0, 0));
-zero_impl!(Complex<u8>, Complex::new(0, 0));
-zero_impl!(Complex<u16>, Complex::new(0, 0));
-zero_impl!(Complex<u32>, Complex::new(0, 0));
-zero_impl!(Complex<u128>, Complex::new(0, 0));
+impl<T: Num + Clone> Zero for Complex<T> {
+    fn zero() -> Self {
+        Complex::new(T::zero(), T::zero())
+    }
+}
 
-zero_impl!(Complex<isize>, Complex::new(0, 0));
-zero_impl!(Complex<i8>, Complex::new(0, 0));
-zero_impl!(Complex<i16>, Complex::new(0, 0));
-zero_impl!(Complex<i32>, Complex::new(0, 0));
-zero_impl!(Complex<i64>, Complex::new(0, 0));
-zero_impl!(Complex<i128>, Complex::new(0, 0));
-
-zero_impl!(Complex<f32>, Complex::new(0.0, 0.0));
-zero_impl!(Complex<f64>, Complex::new(0.0, 0.0));
+impl<T: Num + Clone + Copy> One for Complex<T> {
+    fn one() -> Self {
+        Complex::new(T::one(), T::zero())
+    }
+}
 
 impl<T: Copy + Num + Sub<T, Output = T>> Sub for Complex<T> {
     type Output = Self;
@@ -250,3 +251,5 @@ impl<T: Copy + Num> Mul<T> for Complex<T> {
         Complex::new(self.re * rhs, self.im * rhs)
     }
 }
+
+impl<T: Copy + Num> Num for Complex<T> {}

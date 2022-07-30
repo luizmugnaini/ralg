@@ -15,11 +15,7 @@ pub fn fft(mut p: Polynomial<f32>) -> Vec<Complex<f32>> {
     if n2 != p.coeff.len() {
         p.set_degree_bound(n2 - 1);
     }
-    let v = fft_recursive(Complex::from_real_vec(p.coeff));
-    for cpx in &v {
-        println!("{:?}", cpx);
-    }
-    v
+    fft_recursive(Complex::from_real_vec(p.coeff))
 }
 
 fn fft_recursive(mut v: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
@@ -28,7 +24,7 @@ fn fft_recursive(mut v: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
         return v;
     }
 
-    let root_n = Complex::root_of_unity(n);
+    let root_n = Complex::root_of_unity(n as i32);
     let mut omega = Complex::new(1.0, 0.0);
 
     // Initialize and create the even and odd indexed split of the given vector
@@ -36,9 +32,9 @@ fn fft_recursive(mut v: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
     let mut v_odd = Vec::new();
     v.iter().enumerate().for_each(|(idx, a)| {
         if idx % 2 == 0 {
-            v_even.push(a.clone());
+            v_even.push(*a);
         } else {
-            v_odd.push(a.clone());
+            v_odd.push(*a);
         }
     });
 
@@ -47,10 +43,10 @@ fn fft_recursive(mut v: Vec<Complex<f32>>) -> Vec<Complex<f32>> {
     let y_odd = fft_recursive(v_odd);
 
     for j in 0..n/2 {
-        let t = omega.clone() * y_odd[j].clone();
-        v[j] = y_even[j].clone() + t.clone();
-        v[j + n/2] = y_even[j].clone() - t;
-        omega = root_n.clone() * omega.clone();
+        let t = omega * y_odd[j];
+        v[j] = y_even[j] + t;
+        v[j + n/2] = y_even[j] - t;
+        omega = root_n * omega;
     }
     v
 }

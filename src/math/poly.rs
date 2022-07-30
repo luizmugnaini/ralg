@@ -1,8 +1,10 @@
 //! Polynomials in coefficient representation
 use crate::math::num::Num;
 use core::ops::{Add, Mul, Sub};
-use itertools::EitherOrBoth::{Both, Left, Right};
-use itertools::Itertools;
+use itertools::{
+    EitherOrBoth::{Both, Left, Right},
+    Itertools,
+};
 use std::cmp;
 
 /// Polynomial representation using coefficients
